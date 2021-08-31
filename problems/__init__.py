@@ -3,7 +3,7 @@ from os import listdir
 from os.path import abspath, basename, dirname, getmtime, isfile, join
 from random import randint, seed
 from string import digits
-from typing import Optional, Union
+from typing import Generator, Optional, Union
 
 
 def import_problem(
@@ -129,6 +129,18 @@ class TreeNode:
     def as_list(self) -> list:
         return self._get_values()
 
+    def as_ascii(self, draw_null_children: bool = False) -> str:
+        return tree_to_ascii(self, "val", ("left", "right"), draw_null_children)
+
+    def _iter_levels(self) -> Generator[tuple["TreeNode", int], None, None]:
+        queue = [(self, 0)]
+        while len(queue) > 0:
+            node, level = queue.pop(0)
+            yield node, level
+            if node:
+                queue.append((node.left, level + 1))
+                queue.append((node.right, level + 1))
+
     def _get_values(self) -> list:
         values = [n.val if n else None for n in self]
         while values[-1] is None:
@@ -141,20 +153,96 @@ class TreeNode:
     def __str__(self):
         return str(self._get_values())
 
-    def __iter__(self):
-        queue = [self]
-        while len(queue) > 0:
-            n = queue[0]
-            yield n
-            if n:
-                queue.append(n.left)
-                queue.append(n.right)
-            queue.pop(0)
+    def __iter__(self) -> Generator["TreeNode", None, None]:
+        for node, level in self._iter_levels():
+            yield node
 
     def __cmp__(self, other: Union["TreeNode", list]):
         return self.as_list() == (
             other if type(other) == type(self) else other.as_list()
         )
+
+
+def tree_to_ascii(
+    tree: object,
+    val_attr: str,
+    child_attrs: tuple[str, ...],
+    show_null_children: bool = False,
+) -> str:
+    # this is hidden away here in the utility functions, but I must admit I am proud
+    # of how quickly I managed to figure out a tree-to-ascii printer
+    if tree is None:
+        return " "
+    margin = 3
+    value = str(tree.__getattribute__(val_attr))
+    children = [tree.__getattribute__(child) for child in child_attrs]
+    if not show_null_children:
+        children = [c for c in children if c is not None]
+
+    if len([c for c in children if c is not None]) <= 0:
+        return value
+
+    child_trees = [
+        tree_to_ascii(child, val_attr, child_attrs, show_null_children).split("\n")
+        for child in children
+    ]
+
+    if len(child_trees) <= 0:
+        return value
+
+    child_value_indexes = []
+    child_lengths = []
+    child_heights = []
+    for child_index, child in enumerate(child_trees):
+        prev_length = 0 if child_index == 0 else child_lengths[-1]
+        offset = prev_length + (margin * len(child_lengths))
+        child_lengths.append(len(child[0]))
+        child_heights.append(len(child))
+        child_value_indexes.append((len(child[0]) // 2) + offset)
+
+    total_child_length = sum(child_lengths) + (margin * (len(child_lengths) - 1))
+    max_child_head = max(child_heights)
+
+    output = []
+    for line in [value, "|"]:
+        counter = 0
+        while len(line) < total_child_length:
+            counter += 1
+            if counter % 2 == 0:
+                line = line + " "
+            else:
+                line = " " + line
+        output.append(line)
+    line_start = min(child_value_indexes)
+    line_end = max(child_value_indexes)
+    line_line = ""
+    for index in range(total_child_length):
+        if index in child_value_indexes:
+            if index == line_start == line_end:
+                line_line += "|"
+            elif index == line_start:
+                line_line += "/"
+            elif index == line_end:
+                line_line += "\\"
+            else:
+                line_line += "|"
+        elif line_start <= index <= line_end:
+            line_line += "-"
+        else:
+            line_line += " "
+    output.append(line_line)
+
+    for line_index in range(max_child_head):
+        child_line = []
+        for child in child_trees:
+            if line_index >= len(child):
+                line = " " * len(child[0])
+            else:
+                line = child[line_index]
+            child_line.append(line)
+        output.append((" " * margin).join(child_line))
+
+    return "\n".join(output)
 
 
 def random_list(
