@@ -98,6 +98,65 @@ class ListNode:
             node = node.next
 
 
+class TreeNode:
+    def __init__(self, val=0, left=None, right=None):
+        self.val = val
+        self.left = left
+        self.right = right
+
+    @classmethod
+    def from_list(cls, source_list: list, index=0) -> Optional["TreeNode"]:
+        if index >= len(source_list):
+            return None
+        root = TreeNode(source_list[index])
+        queue = [root]
+        index = 0
+        while len(queue) > 0:
+            n = queue.pop(0)
+            for attr in ["left", "right"]:
+                index += 1
+                if index >= len(source_list):
+                    continue
+                value = source_list[index]
+                if value is None:
+                    n.__setattr__(attr, value)
+                    continue
+                node = TreeNode(value)
+                queue.append(node)
+                n.__setattr__(attr, node)
+        return root
+
+    def as_list(self) -> list:
+        return self._get_values()
+
+    def _get_values(self) -> list:
+        values = [n.val if n else None for n in self]
+        while values[-1] is None:
+            values.pop(-1)
+        return values
+
+    def __repr__(self):
+        return f"TreeNode({str(self)})"
+
+    def __str__(self):
+        return str(self._get_values())
+
+    def __iter__(self):
+        queue = [self]
+        while len(queue) > 0:
+            n = queue[0]
+            yield n
+            if n:
+                queue.append(n.left)
+                queue.append(n.right)
+            queue.pop(0)
+
+    def __cmp__(self, other: Union["TreeNode", list]):
+        return self.as_list() == (
+            other if type(other) == type(self) else other.as_list()
+        )
+
+
 def random_list(
     min_value: int = 0,
     max_value: int = 10,
