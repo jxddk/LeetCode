@@ -7,7 +7,7 @@ class Solution:
         log_pwrs = []
         i = 0
         while True:
-            v = 2 ** i
+            v = 2**i
             if v > n:
                 break
             log_pwrs.append(v)

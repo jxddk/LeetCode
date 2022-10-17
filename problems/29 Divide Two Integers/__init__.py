@@ -71,9 +71,9 @@ examples = [
 ]
 
 seed(__file__)
-for _ in range(2 ** 12):
+for _ in range(2**12):
     random_signs = [1, -1]
-    random_dividend = randint(0, (2 ** 31) - 1) * choice(random_signs)
-    random_divisor = randint(1, (2 ** 8) - 1) * choice(random_signs)
+    random_dividend = randint(0, (2**31) - 1) * choice(random_signs)
+    random_divisor = randint(1, (2**8) - 1) * choice(random_signs)
     random_answer = int(random_dividend / random_divisor)
     examples.append(((random_dividend, random_divisor), random_answer))

@@ -8,7 +8,7 @@ class Solution:
             result = "-" + result[:-1]
 
         result = int(result)
-        bounds = 2 ** 31
+        bounds = 2**31
         if not -1 * bounds < result < bounds - 1:
             return 0
 
@@ -32,7 +32,7 @@ class Solution:
             result = x
         for place in range(max_places):
             modulated = x % (10 ** (place + 1))
-            truncated = int(modulated / (10 ** place))
+            truncated = int(modulated / (10**place))
             inverted = truncated * (10 ** (max_places - place - 1))
             result += inverted
 
@@ -40,7 +40,7 @@ class Solution:
             result *= -1
 
         # python doesn't really have i32's, so this is the alternative
-        bounds = 2 ** 31
+        bounds = 2**31
         if not -1 * bounds < result < bounds - 1:
             return 0
 

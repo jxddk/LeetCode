@@ -36,5 +36,5 @@ class Solution:
 examples: list[tuple[tuple[TreeNode], int]] = [
     ((TreeNode.from_list([3, 2, 3, None, 3, None, 1]),), 7),
     ((TreeNode.from_list([3, 4, 5, 1, 3, None, 1]),), 9),
-    ((TreeNode.from_list(random_list(0, 10 ** 4, 10 ** 4, 10 ** 4)),), 39906791),
+    ((TreeNode.from_list(random_list(0, 10**4, 10**4, 10**4)),), 39906791),
 ]
